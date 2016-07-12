@@ -82,6 +82,7 @@ class MYFTP:
                 os.makedirs(local)
             local_file_list = os.listdir(local)
             print('Local_file_list is now: %s'%local_file_list)
+#			判断文件是不是已经下载过，如果是，那么直接pass，如果不是,则启动新的下载			
             for j in range(len(self.filelist)):
 #                info = os.getcwd()
                 if self.filelist[j] in local_file_list:
