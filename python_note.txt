@@ -176,4 +176,5 @@ return render_to_response('contact_form.html', {'form': form})
 {'message': [u'This field is required.']}
 
 一旦对一个form实体赋值，那么就得到了一个绑定的form:
--- 然后就可以得到
+-- 然后就可以使用绑定form所提供的一系列方法了，比如is_valid(), is_bound, 
+
