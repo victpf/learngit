@@ -1,0 +1,72 @@
+DJANGO
+
+这里，有两个必填项， subject 和 message，所以需要对这两个进行验证。 注意，我们使用
+request.POST.get()方法，并提供一个空的字符串作为默认值；这个方法很好的解决了键丢失与空数据问
+题。
+
+def contact(request):
+errors = []
+if request.method == 'POST':
+if not request.POST.get('subject', ''):
+errors.append('Enter a subject.')
+if not request.POST.get('message', ''):
+errors.append('Enter a message.')
+
+处理错误的输入（使用单个布尔类型和列表的区别）：
+--- 1. 使用单个布尔类型：
+<html>
+<head>
+<title>Search</title>
+</head>
+<body>
+{% if error %}
+<p style="color: red;">Please submit a search term 20 characters or shorter.</p>  --- 这样只能检测到是不是除了错误，不知道除了什么错误以及
+                                                                                      针对不同的错误进行对应的处理
+{% endif %}
+<form action="/search/" method="get">
+<input type="text" name="q">
+<input type="submit" value="Search">
+</form>
+</body>
+</html>
+
+--- 2. 使用列表：
+def search(request):
+**errors = []**
+if 'q' in request.GET:
+q = request.GET['q']
+if not q:
+**errors.append('Enter a search term.')**
+elif len(q) > 20:
+**errors.append('Please enter at most 20 characters.')**
+else:
+books = Book.objects.filter(title__icontains=q)
+return render_to_response('search_results.html',
+{'books': books, 'query': q})
+return render_to_response('search_form.html',
+{**'errors': errors** })
+
+这种情况的代码就可以处理两种错误：
+  （1） 空的输入
+  （2）	超过20字节的输入
+  
+这种情况下，模版也需要进行对应的改动：
+<html>
+<head>
+<title>Search</title>
+</head>
+<body>
+**{% if errors %}**
+**<ul>**
+**{% for error in errors %}**
+**<li>{{ error }}</li>**
+**{% endfor %}**
+**</ul>**
+**{% endif %}**
+<form action="/search/" method="get">
+<input type="text" name="q">
+<input type="submit" value="Search">
+</form>
+</body>
+</html>
+
