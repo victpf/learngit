@@ -170,3 +170,10 @@ return render_to_response('contact_form.html', {'form': form})
 >>> f['message'].errors
 [u'This field is required.']
 也就是说，errors方法可以帮助我们获取出错字段的出错原因
+每一个邦定Form实体都有一个errors属性，它为你提供了一个字段与错误消息相映射的字典表。
+>>> f = ContactForm({'subject': 'Hello', 'message': ''})
+>>> f.errors
+{'message': [u'This field is required.']}
+
+一旦对一个form实体赋值，那么就得到了一个绑定的form:
+-- 然后就可以得到
