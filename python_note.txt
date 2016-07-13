@@ -97,3 +97,45 @@ contract模版：
 </html>
 
 
+
+DJANGO提供的高级库：表单类：
+from django import forms
+class ContactForm(forms.Form):
+subject = forms.CharField()
+email = forms.EmailField(required=False)
+message = forms.CharField()
+这看上去简单易懂，并且很像在模块中使用的语法。 表单中的每一个字段（域）作为Form类的属性，被展现
+成Field类。这里只用到CharField和EmailField类型。 每一个字段都默认是必填。要使email成为可选项，我
+们需要指定required=False。
+
+
+django的高级库里边自定义新的校验方法以及方法的使用规则：
+我们希望`` message`` 字段有一个额外的校验，我们增加一个`` clean_message()`` 方法到`` Form`` 类：
+from django import forms
+class ContactForm(forms.Form):
+subject = forms.CharField(max_length=100)
+email = forms.EmailField(required=False)
+message = forms.CharField(widget=forms.Textarea)
+def clean_message(self):
+message = self.cleaned_data['message']
+num_words = len(message.split())
+if num_words < 4:
+raise forms.ValidationError("Not enough words!")
+return message
+
+Django的form系统自动寻找匹配的函数方法，该方法名称以clean_开头，并以字段名称结束。 如果有这样的
+方法，它将在校验时被调用。
+特别地，clean_message()方法将在指定字段的默认校验逻辑执行* 之后* 被调用。（本例中，在必
+填CharField这个校验逻辑之后。）因为字段数据已经被部分处理，所以它被从self.cleaned_data中提取出来
+了。同样，我们不必担心数据是否为空，因为它已经被校验过了。
+
+
+HTML表单中自动生成的标签默认是按照规则生成的：用空格代替下划线，首字母大写。如email的标签
+是"Email" 。（好像在哪听到过？ 是的，同样的逻辑被用于模块（model）中字段的verbose_name值。 我们在
+第五章谈到过。）
+像在模块中做过的那样，我们同样可以自定义字段的标签。 仅需使用label，像这样：
+class ContactForm(forms.Form):
+subject = forms.CharField(max_length=100)
+email = forms.EmailField(required=False, **label='Your e‐mail address'** )
+message = forms.CharField(widget=forms.Textarea)
+
