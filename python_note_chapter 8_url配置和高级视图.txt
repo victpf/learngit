@@ -1,0 +1,50 @@
+下面是一个使用无名组的 URLconf 的例子:
+from django.conf.urls.defaults import *
+from mysite import views
+urlpatterns = patterns('',
+	(r'^articles/(\d{4})/$', views.year_archive),
+	(r'^articles/(\d{4})/(\d{2})/$', views.month_archive),
+)
+下面是相同的 URLconf，使用命名组进行了重写:
+from django.conf.urls.defaults import *
+from mysite import views
+urlpatterns = patterns('',
+	(r'^articles/(?P<year>\d{4})/$', views.year_archive),
+	(r'^articles/(?P<year>\d{4})/(?P<month>\d{2})/$', views.month_archive),
+)
+这段代码和前面的功能完全一样，只有一个细微的差别： 取的值是以关键字参数的方式而不是以位置参数的方
+式传递给视图函数的。
+
+需要注意的是如果在URLconf中使用命名组，那么命名组和非命名组是不能同时存在于同一个URLconf的模式
+中的。 如果你这样做，Django不会抛出任何错误，但你可能会发现你的URL并没有像你预想的那样匹配正确。
+具体地，以下是URLconf解释器有关正则表达式中命名组和 非命名组所遵循的算法:
+如果有任何命名的组，Django会忽略非命名组而直接使用命名组。
+否则，Django会把所有非命名组以位置参数的形式传递。
+在以上的两种情况，Django同时会以关键字参数的方式传递一些额外参数。 更具体的信息可参考下一
+节
+----------------------------------------------------------------------------------合并冗余代码--------------------------------------------------------------------------------
+
+有了这个概念以后，我们就可以把我们现在的例子改写成这样：
+# urls.py
+from django.conf.urls.defaults import *
+from mysite import views
+urlpatterns = patterns('',
+	(r'^foo/$', views.foobar_view, {'template_name': 'template1.html'}),
+	(r'^bar/$', views.foobar_view, {'template_name': 'template2.html'}),
+)
+# views.py
+from django.shortcuts import render_to_response
+from mysite.models import MyModel
+def foobar_view(request, template_name):
+	m_list = MyModel.objects.filter(is_new=True)
+return render_to_response(template_name, {'m_list': m_list})
+如你所见，这个例子中，URLconf指定了 template_name 。 而视图函数会把它当成另一个参数。
+这种使用额外的URLconf参数的技术以最小的代价给你提供了向视图函数传递额外信息的一个好方法。 正因如
+此，这技术已被很多Django的捆绑应用使用，其中以我们将在第11章讨论的通用视图系统最为明显。
+下面的几节里面有一些关于你可以怎样把额外URLconf参数技术应用到你自己的工程的建议。
+
+
+
+
+
+
